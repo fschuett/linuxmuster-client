@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# mount wrapper for pam_mount
+# frank@linuxmuster.net
+#
+# 15.04.2012
+# GPL v2
+#
+
+# default value for PROFILE_USER
+PROFILE_USER="linuxadmin"
+
+. /usr/share/linuxmuster-client/config || exit 1
+. $USERCONFIG || exit 1
+. /usr/share/linuxmuster-client/helperfunctions.inc || exit 1
+. /usr/share/linuxmuster-client/profile || exit 1
+
+
+# args
+SERVER=$1
+VOLUME=$2
+MNTPT=$3
+USER=$4
+OPTIONS="$5"
+
+
+# Log invocation and parameters
+log_msg "Invoked with: SERVER $SERVER, VOLUME $VOLUME, MNTPT $MNTPT, USER $USER OPTIONS $OPTIONS"
+
+# mounting part starts here
+
+# check if params are all set
+[ -z "$SERVER" ] && exit 1
+[ -z "$VOLUME" ] && exit 1
+[ -z "$MNTPT" ] && exit 1
+[ -z "$USER" ] && exit 1
+# at least user=USERNAME has to beg iven as an option
+[ -z "$OPTIONS" ] && exit 1
+
+# no mounting for lightdm session
+if [ "$USER" == "lightdm" ]; then exit 0; fi
+# no mounting, no hooks for PROFILE_USER
+if [ "$USER" == "$PROFILE_USER" ]; then exit 0; fi
+# no pammount for local users
+grep -q ^${USER}: /etc/passwd && exit 0
+# no pammount for second login of domain-user
+if [ "`mount | grep /var/cache/sophomorix/tasks`" != "" ]; then exit 0; fi
+
+
+# PRE MOUNT HOOK
+log_msg "pre-mount sequence: run_hookdir /etc/linuxmuster-client/pre-mount.d $USER $VOLUME $MNTPT $SERVER $OPTIONS"
+run_hookdir /etc/linuxmuster-client/pre-mount.d $USER $VOLUME $MNTPT $SERVER $OPTIONS
+
+# mount the given share
+log_msg "Executing mount: mount -t cifs //${SERVER}/${VOLUME} $MNTPT -o \"$OPTIONS\""
+
+mount -t cifs //${SERVER}/${VOLUME} $MNTPT -o "$OPTIONS" || exit 1
+
+# POST MOUNT HOOK
+log_msg "post-mount sequence: run_hookdir /etc/linuxmuster-client/post-mount.d $USER $VOLUME $MNTPT $SERVER $OPTIONS"
+run_hookdir /etc/linuxmuster-client/post-mount.d $USER $VOLUME $MNTPT $SERVER $OPTIONS

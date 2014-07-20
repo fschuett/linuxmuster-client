@@ -1,0 +1,53 @@
+#!/bin/bash
+# Script created by Rainer Rössler (roesslerrr-at-web.de)
+# modified by Frank Schütte fschuett@gymnasium-himmelsthuer.de
+# License: Free Software (License GPLv3)
+# 20.7.2014
+
+. /usr/share/linuxmuster-client/config || exit 1
+. ${USERCONFIG} || exit 1
+. ${HELPERFUNCTIONS} || exit 1
+
+# Verzeichnis für Einstellungen im Heimatverzeichnis auf dem Server
+#. /etc/linuxmuster-client/profile/home-preference.conf || exit 1
+[ $VOLUME == tasks ] ||  return 0
+
+[ "$LINKFOLDERTASKS" == "" ] && return 0
+
+# log some info
+$LOGGING && log_msg post-mount "Entering 006-tasks-links $1 $2"
+
+if [ ${HOMEDIR%/*/*} == '/home/workstations' ]; then 
+ RAUM=`echo $HOMEDIR | cut -d "/" -f 4`
+ SERVER="/var/cache/sophomorix/tasks/rooms/$RAUM"
+ LOKAL="$HOMEDIR/$LINKFOLDERTASKS"
+ verlinke $LOKAL $SERVER
+else
+ # kein KA-account angemeldet, d.h. Schüler oder Lehrer ist angemeldet
+ GRUPPEN=$(id -nG $USER)
+ $LOGGING && log_msg 006-tasks-links "Gefundene Gruppen: $GRUPPEN"
+ erzeugeLeer "$HOMEDIR/$LINKFOLDERTASKS"
+ for GRMITGLIED in $GRUPPEN; do
+   LOKAL="$HOMEDIR/$LINKFOLDERTASKS/vorlagen-$GRMITGLIED"
+   case $GRMITGLIED in
+     *-[ABCD])
+              $LOGGING && log_msg 006-tasks-links "Gruppe: $GRMITGLIED ist eine Subklasse..."
+              SERVER="/var/cache/sophomorix/tasks/subclasses/$GRMITGLIED"
+              ;;
+     p_*)
+              $LOGGING && log_msg 006-tasks-links "Gruppe: $GRMITGLIED ist eine Projektgruppe..."
+              SERVER="/var/cache/sophomorix/tasks/projects/$GRMITGLIED"
+              ;;
+     *)
+              $LOGGING && log_msg 006-tasks-links "Gruppe: $GRMITGLIED ist eine Klasse..."
+              SERVER="/var/cache/sophomorix/tasks/classes/$GRMITGLIED"
+              ;;
+   esac
+   $LOGGING && log_msg 006-tasks-links "verlinke $LOKAL $SERVER"
+   verlinke "$LOKAL" "$SERVER"
+ done
+fi
+
+# Das Script wird nicht mit einem "exit 0" beendet, da es in das Script
+# /usr/sbin/linuxmuster-pam-mount includiert ist und dadurch ein exit
+# das Hauptscript beenden würde.

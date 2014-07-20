@@ -1,0 +1,179 @@
+#! /bin/sh
+# Copyright (c) 2011 Frank Schuette
+# All rights reserved.
+#
+# update configuration files
+#
+if test "$UID" != 0 -a "$USER" != root; then
+    echo "You must be root to start $0."
+    exit 1
+fi
+
+r=$ROOT
+
+for i in $r/etc/sysconfig/linuxmuster-client $r/usr/share/linuxmuster-client/config; do
+  if test ! -f $i ; then
+    echo "No $i found."
+    exit 1
+  fi
+
+  . $i
+done
+
+test -n "$ROOT" && exit 0
+
+DOUPDATE=0
+TIMESTAMP=/usr/share/linuxmuster-client/.current
+[ ! -e $TIMESTAMP ] && DOUPDATE=1
+[ $DOUPDATE -eq 0 -a -e /etc/ldap.conf -a /etc/ldap.conf -nt $TIMESTAMP ] && DOUPDATE=1
+[ $DOUPDATE -eq 0 -a -e /etc/openldap/ldap.conf -a /etc/openldap/ldap.conf -nt $TIMESTAMP ] && DOUPDATE=1
+[ $DOUPDATE -eq 0 -a -e /etc/sssd/sssd.conf -a /etc/sssd/sssd.conf -nt $TIMESTAMP ] && DOUPDATE=1
+[ $DOUPDATE -eq 0 -a -e /etc/sysconfig/linuxmuster-client -a /etc/sysconfig/linuxmuster-client -nt $TIMESTAMP ] && DOUPDATE=1
+
+[ $DOUPDATE -eq 0 ]  && exit 0;
+
+# source config manipulation functions
+. /usr/share/linuxmuster-client/update.functions || exit 1;
+
+patch_config(){
+    # patching configuration files
+    echo "Patching configuration ..."
+    cd /var/lib/linuxmuster-client
+    # Verzeichnisse müssen existieren!!!
+	cd templates
+	for f in `find -type f -print`; do
+	    # remove ./
+	    [ "${f:0:2}" = "./" ] && f="${f:2}"
+	    # Verzeichnisse müssen existieren
+	    mkdir -p $(dirname "/${f}")
+	    sed -e "s%@@studentshome@@%${STUDENTSHOME}%g
+ 					s%@@sharehome@@%${SHAREHOME}%g
+ 					s%@@progsdir@@%${PROGSDIR}%g
+ 					s%@@cdsdir@@%${CDSDIR}%g
+ 					s%@@taskscache@@%${TASKSCACHE}%g
+ 					s%@@basedn@@%${basedn}%g
+ 					s%@@binpath@@%bin%g
+ 					s%@@administrator@@%${ADMINISTRATOR}%g
+ 					s%@@pgmadmin@@%${PGMADMIN}%g
+ 					s%@@serverip@@%${serverip}%g" "${f}" >"/${f}.linuxmuster-client"
+ 	    if head -n 1 "/${f}.linuxmuster-client" |grep -q "^<?xml" ; then
+ 		if [ `basename "${f}"` == "pam_mount.conf.xml" -a -e "/${f}" ]; then
+ 		    /usr/share/linuxmuster-client/update-pm-xml.pl "/${f}.linuxmuster-client" "/${f}"
+ 		    rm -f "/${f}.linuxmuster-client"
+ 		else
+ 		    mv -f "/${f}.linuxmuster-client" "/${f}";
+ 		fi
+ 	    else # special patching
+ 		MARKER=`tail -n 2 "/${f}.linuxmuster-client"|grep "# End of"`;
+ 		if [ "${MARKER:0:5}" != "# End" ]; then
+ 		    MARKER="# End of $(basename ${f}) file"
+ 		fi
+ 		if [ ! -e "/${f}" ]; then
+ 		    sed -n -e '/^#.*/p' -e '/^ [ ^I]*$/p' "/${f}.linuxmuster-client" >"/${f}"
+ 		fi
+ 		extractContent "/${f}.linuxmuster-client"
+ 		LINES=`cat /${f}.linuxmuster-client`;
+ 		insertLines "/${f}" "${LINES}" "${MARKER}"
+ 		rm -f "/${f}.linuxmuster-client"
+ 	    fi
+ 	done;
+	cd ..
+}
+
+patch_sysconfig(){
+    echo "Patching sysconfig file ..."
+    DATEI="/etc/sysconfig/linuxmuster-client"
+    if cat "$DATEI" | grep -q "^LDAP_SERVER="; then
+	sed -e "s@LDAP_SERVER=.*@LDAP_SERVER=\"${serverip}\"@" -i "$DATEI"
+    else
+	echo "LDAP_SERVER=\"${serverip}\"">>"$DATEI"
+    fi
+    if cat "$DATEI" | grep -q "^BASE_DN="; then
+	sed -e "s@BASE_DN=.*@BASE_DN=\"${basedn}\"@" -i "$DATEI"
+    else
+	echo "BASE_DN=\"${basedn}\"">>"$DATEI"
+    fi
+}
+
+patch_ldap(){
+    if [ -e /etc/ldap.conf ]; then
+	CONFFILE=/etc/ldap.conf
+	setvalue "uri" "ldap://${serverip}" "Adresse des LDAP-Servers"
+	setvalue "nss_default_attribute_value" "loginShell /bin/bash" "default loginShell for LDAP users"
+	setvalue "nss_schema" "rfc2307"
+	setvalue "ssl" "start_tls"
+	if [ "$(echo "$CHECK_CERT" | tr 'A-Z' 'a-z' )" != "yes" ]; then
+	    setvalue "tls_checkpeer" "no" "switch tls_checkpeer on/off"
+	else
+	    setvalue "tls_checkpeer" "yes" "switch tls_checkpeer on/off"
+	fi
+    fi
+}
+
+patch_openldap(){
+    if [ -e /etc/openldap/ldap.conf ]; then
+	CONFFILE=/etc/openldap/ldap.conf
+	setvalue "uri" "ldap://${serverip}"
+	setvalue "base" "${basedn}"
+	if [ "$(echo "$CHECK_CERT" | tr 'A-Z' 'a-z' )" != "yes" ]; then
+	    setvalue "TLS_REQCERT" "allow"
+	else
+	    setvalue "TLS_REQCERT" "demand"
+	fi
+    fi
+}
+
+patch_sssd(){
+    CONFFILE=/etc/sssd/sssd.conf
+    if [ -e "${CONFFILE}" ]; then
+	echo "Patching ${CONFFILE}..."
+	setkeyvalue "domain/default" "ldap_uri" "ldap://${serverip}"
+	setkeyvalue "domain/default" "ldap_search_base" "${basedn}"
+	setkeyvalue "domain/default" "ldap_user_shell" "/bin/bash"
+	setkeyvalue "domain/default" "ldap_id_use_start_tls" "False"
+	setkeyvalue "domain/default" "override_shell" "/bin/bash"
+	setkeyvalue "domain/default" "ldap_schema" "rfc2307"
+	if [ "$(echo "$CHECK_CERT" | tr 'A-Z' 'a-z' )" != "yes" ]; then
+	    setkeyvalue "domain/default" "ldap_tls_reqcert" "allow"
+	else
+	    setkeyvalue "domain/default" "ldap_tls_reqcert" "demand"
+	fi
+    fi
+}
+
+#########################################################################
+echo "update-client-config: Doing update"
+
+get_ldap
+
+if [ -z "$serverip" ]; then
+    echo "Cannot get the ip for the ldap server! Skipping configuration!"
+    exit 0
+fi
+if [ -z "$basedn" ]; then
+    echo "Cannot get ldap basedn! Skipping configuration!"
+    exit 0
+fi
+
+patch_sysconfig
+
+patch_ldap
+
+patch_openldap
+
+patch_sssd
+
+patch_config
+
+touch $TIMESTAMP
+
+
+# change system variables
+DATEI="/etc/sysconfig/network/dhcp"
+if cat "$DATEI" | grep -q "^DHCLIENT_LEASE_TIME="; then
+    sed -e 's@DHCLIENT_LEASE_TIME=.*@DHCLIENT_LEASE_TIME="172800"@' -i "$DATEI"
+else
+    echo 'DHCLIENT_LEASE_TIME="172800"'>>"$DATEI"
+fi
+
+exit 0

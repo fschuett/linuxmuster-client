@@ -1,0 +1,176 @@
+# helper functions for config file manipulation
+
+#-------------------------- sections, keys and values ----------------------------
+# global CONFFILE
+#
+
+setvalue(){
+	local key=$1
+	local value=$2
+	local comment=$3
+	
+	if [ -z "${CONFFILE}" ]; then
+	    echo "Fehler: \$CONFFILE ist leer."
+	    return
+	fi
+	
+	if ! grep -q "^${key}[[:blank:]]\+" ${CONFFILE}; then
+		echo "Adding ${key} to ${CONFFILE} ..."
+		[ -z "${comment}" ] || echo >>${CONFFILE}
+		[ -z "${comment}" ] || echo "# ${comment}">>${CONFFILE}
+		echo "${key}	${value}">>${CONFFILE}
+	else
+		echo "Replacing ${key} in ${CONFFILE}..."
+		sed -e "s|^${key}[[:blank:]]\+.*|${key}	${value}|" -i ${CONFFILE}
+	fi
+}
+
+getkeyvalue(){
+local section=$1
+local key=$2
+ret=`sed -n -e "\!^\[${section}\]!,\!\[!p" "${CONFFILE}"| sed -n -e "\!^${key}[[:blank:]]*=!p"|cut -d\= -f2`
+}
+
+findkey(){
+local section=$1
+local key=$2
+ret=`sed -n -e "\!^\[${section}\]!,\!\[!p" "${CONFFILE}"| sed -n -e "\!^${key}[[:blank:]]*=!p"|cut -d\= -f2`
+if [ -n "${ret}" ]; then
+    ret=true
+else
+    ret=false
+fi
+}
+
+findsection(){
+local section=$1
+ret=`sed -n -e "\!^\[${section}\]!p" "${CONFFILE}"`
+if [ -n "${ret}" ]; then
+    ret=true
+else
+    ret=false
+fi
+}
+
+setkeyvalue(){
+local section=$1
+local key=$2
+local value=$3
+findsection $1
+
+if [ ! "${ret}" = "true" ]; then
+    echo "">>"${CONFFILE}"
+    echo "[${section}]" >>"${CONFFILE}"
+    echo "" >>"${CONFFILE}"
+fi
+
+findkey $1 $2
+if [ "${ret}" = "true" ]; then
+    sed -e "s@^${key}[[:blank:]]*=.*@${key} = ${value}@" -i "${CONFFILE}"
+else
+    sed -e "\!^\[${section}\]! { 
+a\
+${key} = ${value}
+}" -i "${CONFFILE}"
+fi
+}
+
+#-----------------------------------------------------------------------
+
+# global serverip
+# global basedn
+#
+get_ldap(){
+    local _serverip=
+    local _basedn=
+
+    CONFFILE=/etc/sysconfig/linuxmuster-client
+    if [ -e ${CONFFILE} ]; then
+      . ${CONFFILE}
+      _serverip=${LDAP_SERVER}
+      _basedn=${BASE_DN}
+    fi
+    [ -z "${_serverip}" ] || serverip="${_serverip}"
+    [ -z "${_basedn}" ] || basedn="${_basedn}"
+    [ -z "${serverip}" -o -z "${basedn}" ] || return;
+    CONFFILE=/etc/ldap.conf
+    if [ -e ${CONFFILE} ]; then
+	if grep -q '^host[[:blank:]]\+' ${CONFFILE}; then
+	    _serverip=`grep '^host[[:blank:]]\+' ${CONFFILE}|sed 's#[[:blank:]]\+#:#g'|cut -d\: -f2`;
+	elif grep -q '^uri[[:blank:]]\+' ${CONFFILE}; then
+	    _serverip=`grep '^uri[[:blank:]]\+' ${CONFFILE}|cut -d\: -f2|sed 's#\/\/##'`;
+	fi
+	_basedn=`grep '^base[[:blank:]]\+' ${CONFFILE}|sed 's#[[:blank:]]\+#:#g'|cut -d\: -f2`;
+    fi
+    [ -z "${_serverip}" ] || serverip="${_serverip}"
+    [ -z "${_basedn}" ] || basedn="${_basedn}"
+    [ -z "${serverip}" -o -z "${basedn}" ] || return;
+    CONFFILE=/etc/openldap/ldap.conf
+    if [ -e "${CONFFILE}" ]; then
+	if grep -q '^HOST[[:blank:]]\+' ${CONFFILE}; then
+	    _serverip=`grep '^HOST[[:blank:]]\+' ${CONFFILE}|sed 's#[[:blank:]]\+#:#g'|cut -d\: -f2`;
+	elif grep -q '^URI[[:blank:]]\+' ${CONFFILE}; then
+	    _serverip=`grep '^URI[[:blank:]]\+' ${CONFFILE}|cut -d\: -f2|sed 's#\/\/##'`;
+	fi
+	_basedn=`grep '^BASE[[:blank:]]\+' ${CONFFILE}|sed 's#[[:blank:]]\+#:#g'|cut -d\: -f2`;
+    fi
+    [ -z "${_serverip}" ] || serverip="${_serverip}"
+    [ -z "${_basedn}" ] || basedn="${_basedn}"
+    [ -z "${serverip}" -o -z "${basedn}" ] || return;
+    CONFFILE=/etc/sssd/sssd.conf
+    if [ -e "${CONFFILE}" ]; then
+	getkeyvalue "domain/default" "ldap_uri"
+	_serverip=`echo "${ret}"|cut -d\/ -f3`
+	getkeyvalue "domain/default" "ldap_search_base"
+	_basedn="${ret}"
+    fi
+    [ -z "${_serverip}" ] || serverip="${_serverip}"
+    [ -z "${_basedn}" ] || basedn="${_basedn}"
+}
+
+# ---------------------- functions for patching -----------------------
+# adding net users to wine group
+# $1 file name to edit in place
+# $2 lines to insert into file
+# $3 marker to insert before
+#
+insertLines(){
+    local FILE=$1
+    local LCB="# linuxmuster-client-BEGIN"
+    local LCE="# linuxmuster-client-ENDE"
+    local LINES="$2"
+    local MARKER="$3"
+    [ -z "${MARKER}" ] && MARKER="# End of file"
+    sed -e "/$LCB/,/$LCE/ d" -i $FILE
+    if grep -q "^${MARKER}" $FILE; then
+	LINES=$(echo "${LINES}"| sed '{:a;N;$!ba;s/\n/\\\n/g;}')
+	sed "
+/^#$/ {
+    N
+    /\n${MARKER}.*/ {
+	i\
+${LCB}\n\
+${LINES}\n\
+${LCE}
+    }
+    P
+    D
+}" -i $FILE
+    else
+	echo "$LCB" >>$FILE
+	echo "$LINES" >>$FILE
+	echo "$LCE" >>$FILE
+	echo "#" >>$FILE
+	echo "$MARKER" >>$FILE
+	echo "#" >>$FILE
+    fi
+}
+
+# -----------------------
+# global LINES
+# $1 file name to extract from
+#
+extractContent(){
+    local FILE=$1
+    sed -e 's/#.*//' -e 's/[ ^I]*$//' -e '/^$/ d' -i ${FILE}
+}

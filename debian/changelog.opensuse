@@ -1,0 +1,32 @@
+linuxmuster-client (0.9.19-10)
+  * Unterscheidung nach openSUSE-Versionen entfernt
+  * Links für Linuxmuster.net 6.1 hinzugefügt
+  * [u]mount.sh umbenannt und verschoben nach usr/sbin/linuxmuster-pam-[u]mount
+linuxmuster-client (0.9.19-0)
+  * openSUSE 11.4 hinzugefügt
+  * openSUSE 12.1 hinzugefügt
+  * changed linuxmuster-hostname -> boot.linuxmuster-client-early
+linuxmuster-client (0.9.18.1)
+  * openSUSE 11.3 hinzugefügt
+linuxmuster-client (0.9.15.1)
+  * openSUSE 11.2 hinzugefügt
+linuxmuster-client (0.9.15)
+  * neue Variablen MYFILES, APPS_BASEDIR
+  * MANDATORY_GROUPS entfernt
+  * preun.sh Variable $1 eingefügt
+linuxmuster-client (0.9.9)
+  * samba auf dem Server ist 3.2.5, daher ist nfs nicht mehr erforderlich
+  * Änderungen als Patch gegenüber den Quellen
+  
+linuxmuster-client (0.9.2)
+  * linuxmuster-hostname -> boot.linuxmuster-hostname wird Boot-Skript
+  * bug in umount.sh fixed
+  * chmod,chown moved out of linuxmuster-client.[c]sh
+  * fixed mount sequence to mount home first  
+  
+linuxmuster-client (0.9.0)
+
+  * initial release
+  * adapted the linuxmuster-client from Debian deb file
+
+ -- Frank Schuette <fschuett@gymnasium-himmelsthuer.de>  7-2010

@@ -1,0 +1,342 @@
+linuxmuster-client (0.9.19-0) testing; urgency=low
+
+  * updated entry for Ubuntu 10.04.x in supported_distros (closes #401).
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Mon, 13 Dec 2010 17:38:47 +0100
+
+linuxmuster-client (0.9.18-1) testing; urgency=low
+
+  * updated entry for Ubuntu 10.04 LTS in supported_distros.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Thu, 29 Apr 2010 12:37:18 +0200
+
+linuxmuster-client (0.9.18-0) testing; urgency=low
+
+  * pam_ldap uses now start tls.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Thu, 18 Mar 2010 23:33:30 +0100
+
+linuxmuster-client (0.9.17-1) testing; urgency=low
+
+  * experimental support for Ubuntu lucid.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Mon, 01 Mar 2010 21:41:04 +0100
+
+linuxmuster-client (0.9.16-1) testing; urgency=low
+
+  * added hook dirs /etc/linuxmuster-client/mount.d and /etc/linuxmuster-client/umount.d
+    for user scripts to be sourced after mount and before umount of user's home.
+  * added some new environment variables to /usr/share/linuxmuster-client/config.
+  * removed USERDIRS variable from /usr/share/linuxmuster-client/config, renamed to LINKDIRS.
+  * added LINKDIRS variable to /etc/linuxmuster-client/config for directories,
+    which needed to be temporarily linked to /tmp during user session.
+  * some modifications in mount.sh and umount.sh due to above changes.
+  * obsolete configfile /etc/gdm/PostLogin/Default will be moved to Default.dpkg-old
+    during postinst if present.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Fri, 18 Dec 2009 10:55:53 +0100
+
+linuxmuster-client (0.9.15-1) testing; urgency=low
+
+  * removed sourcing old config file /etc/linuxmuster-client.conf from init script.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 10 Nov 2009 19:46:26 +0100
+
+linuxmuster-client (0.9.15-0) testing; urgency=low
+
+  * fixed broken group memberships, added pam_group.so to common-auth.
+  * moved package configuration to postinst.
+  * moved /etc/gdm/PostLogin/Default to /usr/share/linuxmuster-client/copy-template.sh,
+    which will be sourced by mount.sh.
+  * removed etch from supported distros.
+  * added new config variable MYFILES.
+  * added desktop link to MYFILES if set.
+  * added templates for APPS_BASEDIR and MYFILES.
+  * fixed: parts of profile were not copied.
+  * removed keyrings/ from profile.exclude.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sun, 08 Nov 2009 14:05:21 +0100
+
+linuxmuster-client (0.9.14-3) testing; urgency=low
+
+  * modified supported_distros for Ubuntu 9.10.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Wed, 04 Nov 2009 08:11:13 +0100
+
+linuxmuster-client (0.9.14-2) testing; urgency=low
+
+  * improved value sync between ldap-auth-config and linuxmuster-client during package configuration.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sat, 10 Oct 2009 12:33:39 +0200
+
+linuxmuster-client (0.9.14-1) testing; urgency=low
+
+  * added iocharset=utf8 to and removed wsize,rsize mount options from pam_mount.conf.xml template for hardy and intrepid also.
+  * added more excludes to profile.exclude.
+  * minor code cleanup in helperfunctions.sh.
+  * added "exit 0" at the end of /etc/gdm/PostLogin/Default (an error causes Hardy's gdm to cancle the user session.
+  * removed obsolete config file hardy/templates/etc/security/pam_mount.conf.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Fri, 9 Oct 2009 19:48:13 +0200
+
+linuxmuster-client (0.9.13-1) testing; urgency=low
+
+  * some improvements according to user dir syncing at begin and end of session.
+    (-> config, profile, mount.sh, umount.sh, Default).
+  * added iocharset=utf8 to and removed wsize,rsize mount options from pam_mount.conf.xml template.
+  * improved package configuration: values for ldap server and base dn were read from package ldap-auth-config.
+  * moved client config file to /etc/linuxmuster-client/config
+  * added config file /etc/linuxmuster-client/profile.exclude
+  * added experimental support for Karmic Koala.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Thu, 8 Oct 2009 21:42:49 +0200
+
+linuxmuster-client (0.9.12-1) testing; urgency=low
+
+  * removed common-* pam configs for jaunty.
+  * moved config file patching from config to postinst.
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Fri, 2 Oct 2009 16:54:22 +0200
+
+linuxmuster-client (0.9.11-1) testing; urgency=low
+
+  * fixed ldap configuration for Ubuntu 9.04
+  * fixed rm commands in mount scripts
+  * moved permission correction for students home dirs from profile to gdm's PostLogin script
+  * added missing LSB information to init scripts
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sat, 11 Jul 2009 18:07:34 +0200
+
+linuxmuster-client (0.9.10-1) testing; urgency=low
+
+  * added final support for Ubuntu 9.04
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 05 May 2009 15:22:53 +0200
+
+linuxmuster-client (0.9.9-3) testing; urgency=low
+
+  * fix missing jaunty template link
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Thu, 19 Mar 2009 12:55:08 +0100
+
+linuxmuster-client (0.9.9-2) testing; urgency=low
+
+  * moved value syncing between debconf and linuxmuster-client.conf from postinst to config
+  * added german template translations
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Thu, 05 Mar 2009 10:15:12 +0100
+
+linuxmuster-client (0.9.9-1) testing; urgency=low
+
+  * added firefox profile handling
+  * empty default settings for TEMPLATE_USER and FIREFOX
+  * debconf values for FIREFOX and TEMPLATE_USER were only set if they
+    were emtpy in linuxmuster-client.conf
+  * removed obsolete profile handling from postinst
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Wed, 04 Mar 2009 19:54:28 +0100
+
+linuxmuster-client (0.9.8-1) testing; urgency=low
+
+  * moved profile script to /etc/gdm/Post/login/Default
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 03 Mar 2009 21:09:49 +0100
+
+linuxmuster-client (0.9.7-1) testing; urgency=low
+
+  * at least more bugfixes
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 03 Mar 2009 19:11:47 +0100
+
+linuxmuster-client (0.9.6-1) testing; urgency=low
+
+  * more bugfixes
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 03 Mar 2009 19:11:47 +0100
+
+linuxmuster-client (0.9.5-1) testing; urgency=low
+
+  * few bugfixes
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 03 Mar 2009 19:11:47 +0100
+
+linuxmuster-client (0.9.4-1) testing; urgency=low
+
+  * added profile support (thanks to Jörg Richter)
+  * added experimental support for jaunty
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 03 Mar 2009 19:11:47 +0100
+
+linuxmuster-client (0.9.3-1) testing; urgency=low
+
+  * removed support for knoppix, dapper, edgy, feisty and gutsy
+  * added support for intrepid ibex
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sat, 29 Nov 2008 13:35:36 +0100
+
+linuxmuster-client (0.9.2-1) testing; urgency=low
+
+  * added nobrl mount option for user's home to hardy's pam_mount.conf.xml
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 02 Sep 2008 16:13:56 +0200
+
+linuxmuster-client (0.9.1-1) testing; urgency=low
+
+  * added ubuntu 8.04 hardy support
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 01 Jul 2008 14:31:36 +0200
+
+linuxmuster-client (0.9.0-1) testing; urgency=low
+
+  * fixed usb media unmount problems
+  * removed ivman
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sun, 25 Nov 2007 14:59:21 +0100
+
+linuxmuster-client (0.8.7-1) testing; urgency=low
+
+  * cleaning previous user from kdm login on shutdown
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Thu, 22 Nov 2007 08:04:31 +0100
+
+linuxmuster-client (0.8.6-1) testing; urgency=low
+
+  * added pgm and cdrom shares to pam_mount.conf
+  * moved user's .local directory also to /tmp while he is logged in
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Wed, 21 Nov 2007 20:42:00 +0100
+
+linuxmuster-client (0.8.5-1) testing; urgency=low
+
+  * fixed permissions handling of home and cache dirs, which are mounted
+    by pam_mount
+  * added check_empty_dir function to helperfunctions.sh
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Wed, 21 Nov 2007 10:35:54 +0100
+
+linuxmuster-client (0.8.4-1) testing; urgency=low
+
+  * deactivated udev's persistent net rules for Gutsy
+  * added /etc/network/interfaces to Gutsy configuration
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Mon, 19 Nov 2007 17:59:09 +0100
+
+linuxmuster-client (0.8.3-1) testing; urgency=low
+
+  * changed Gutsy entry in supported_distros to "Ubuntu 7.10"
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sat, 20 Oct 2007 16:49:27 +0200
+
+linuxmuster-client (0.8.2-2) testing; urgency=low
+
+  * added gutsy specific template for /etc/ldap.conf
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Mon, 17 Sep 2007 22:23:41 +0200
+
+linuxmuster-client (0.8.2-1) testing; urgency=low
+
+  * added experimental gutsy support
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Mon, 17 Sep 2007 20:12:30 +0200
+
+linuxmuster-client (0.8.1-1) testing; urgency=low
+
+  * added START_IVMAN variable in ivman init script to prevent start at boot time
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Mon, 17 Sep 2007 16:45:57 +0200
+
+linuxmuster-client (0.8.0-1) testing; urgency=low
+
+  * fixed feisty entry in supported_distros
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sat, 28 Jul 2007 15:33:52 +0200
+
+linuxmuster-client (0.7-2) testing; urgency=low
+
+  * syncing home permissions to server
+  * added /home/attic
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sat, 23 Jun 2007 12:50:10 +0200
+
+linuxmuster-client (0.7-1) testing; urgency=low
+
+  * added feisty support (experimental)
+  * added ldap administrator to sudoers
+  * added printoperators group dto cupsd system groups
+  * adding cupsys to shadow group
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Tue, 20 Mar 2007 20:25:26 +0100
+
+linuxmuster-client (0.6-3) testing; urgency=low
+
+  * fixed etch support
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Mon, 26 Feb 2007 20:33:49 +0100
+
+linuxmuster-client (0.6-2) testing; urgency=low
+
+  * added ivman instead of usbmount to package dependencies
+  * added ivman configuration
+  * added etch and knoppix to supported distros
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sun, 25 Feb 2007 21:54:55 +0100
+
+linuxmuster-client (0.6-1) testing; urgency=low
+
+  * renamed package to linuxmuster-client
+  * admin users administrator and pgmadmin will go in local admin groups
+  * caching user's homedir to not query the ldap 10 times
+  * reworked mount and umount skripts
+  * moved supplemental group handling for ldap users to pam_group module
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Fri, 23 Feb 2007 16:22:37 +0100
+
+linuxmuster-clientconfig (0.5-2) testing; urgency=low
+
+  * removing user from supplementary groups when unmounting
+  * cleaning tmp dirs when user logs out
+  * added host specific xorg.conf handling to init scripts
+  * fixed path to lsof in pam_mount.conf
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Thu, 22 Feb 2007 21:14:49 +0100
+
+linuxmuster-clientconfig (0.5-1) testing; urgency=low
+
+  * added usbmount to package dependencies
+  * added edgy to supported distros
+  * preventing init script from starting and stopping on package upgrade or install
+  * added linuxmuster-hostname init script to /etc/rcS.d with number 40,
+    sets the hostname for dhclient.conf before networking starts
+  * adding linuxmuster-hostname init script to /etc/rcS.d with number 40,
+    sets the hostname for dhclient.conf before networking starts
+  * adding local system group nvram during postinst if it does not exist,
+    to prevent udev from ldap search for this group
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Wed, 21 Feb 2007 18:50:55 +0100
+
+linuxmuster-clientconfig (0.4-1) testing; urgency=low
+
+  * moved scripts from /etc to /usr/share/linuxmuster-clientconfig
+  * reworked login script to a mount wrapper for pam_mount
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sat, 03 Feb 2007 12:20:48 +0100
+
+linuxmuster-clientconfig (0.3-1) testing; urgency=low
+
+  * added hal.conf to allow group plugdev automount usb devices
+  * putting user into supplementary local groups that he can access hardware
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Fri, 02 Feb 2007 17:37:54 +0100
+
+linuxmuster-clientconfig (0.2-1) testing; urgency=low
+
+  * optimized cifs mount options
+  * added share mount to pam_mount.conf template
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Mon, 29 Jan 2007 17:15:01 +0100
+
+linuxmuster-clientconfig (0.1-1) testing; urgency=low
+
+  * initial release
+
+ -- Thomas Schmitt <schmitt@lmz-bw.de>  Sat, 04 Nov 2006 16:51:53 +0100

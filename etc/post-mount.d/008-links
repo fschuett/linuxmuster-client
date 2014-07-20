@@ -1,0 +1,42 @@
+#!/bin/bash
+# Script created by Rainer Rössler (roesslerrr-at-web.de)
+# modified by Frank Schütte fschuett@gymnasium-himmelsthuer.de
+# License: Free Software (License GPLv3)
+# 20.7.2014
+
+. /usr/share/linuxmuster-client/config || exit 1
+. ${USERCONFIG} || exit 1
+. ${HELPERFUNCTIONS} || exit 1
+
+# Verzeichnis für Einstellungen im Heimatverzeichnis auf dem Server
+#. /etc/linuxmuster-client/profile/home-preference.conf || exit 1
+
+[ $VOLUME == shares ] ||  return 0
+
+$LOGGING && log_msg post-mount "Entering 008-links $1 $2"
+
+# Links einlesen
+# HOMEDIR soll dabei mit dem lokalen Heimatverzeichnis ersetzt werden
+if [ -f /etc/linuxmuster-client/links.conf ]; then
+ LINKS=`cat /etc/linuxmuster-client/links.conf | grep ^[^#\] | sed -e "s#HOMEDIR#$HOMEDIR#g"`
+else
+ LINKS=""
+fi
+
+OLDIFS=$IFS
+IFS=$'\012'
+
+# Links nach Variable LINKS erzeugen
+
+for NACHEINANDER in $LINKS; do
+ SERVER=`echo $NACHEINANDER | cut -d ":" -f 1`
+ LOKAL=`echo $NACHEINANDER | cut -d ":" -f 2`
+ $LOGGING && log_msg post-mount "verlinke $LOKAL $SERVER"
+ verlinke "$LOKAL" "$SERVER"
+done
+
+IFS=$OLDIFS
+
+# Das Script wird nicht mit einem "exit 0" beendet, da es in das Script
+# /usr/sbin/linuxmuster-pam-mount includiert ist und dadurch ein exit
+# das Hauptscript beenden würde.

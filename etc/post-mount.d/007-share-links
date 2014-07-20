@@ -1,0 +1,56 @@
+#!/bin/bash
+# Script created by Rainer Rössler (roesslerrr-at-web.de)
+# modified by Frank Schütte fschuett@gymnasium-himmelsthuer.de
+# License: Free Software (License GPLv3)
+# 20.7.2014
+
+. /usr/share/linuxmuster-client/config || exit 1
+. ${USERCONFIG} || exit 1
+. ${HELPERFUNCTIONS} || exit 1
+
+[ $VOLUME == shares ] ||  return 0
+
+[ "$LINKFOLDERSHARE" == "" ] && return 0
+
+[ ${HOMEDIR%/*/*} == '/home/workstations' ] && return 0
+
+$LOGGING && log_msg post-mount "Entering 007-share-links $1 $2 HOMEDIR=$HOMEDIR,USER=$USER,VOLUME=$VOLUME,LINKFOLDERSHARE=$LINKFOLDERSHARE,SCHOOL=$SCHOOL,TEACHERS=$TEACHERS"
+
+# kein KA-account angemeldet, d.h. Schüler oder Lehrer ist angemeldet
+GRUPPEN=$(id -nG $USER)
+$LOGGING && log_msg 007-share-links "Gefundene Gruppen: $GRUPPEN"
+erzeugeLeer "$HOMEDIR/$LINKFOLDERSHARE"
+for GRMITGLIED in $GRUPPEN; do
+   LOKAL="$HOMEDIR/$LINKFOLDERSHARE/tausch-$GRMITGLIED"
+   case $GRMITGLIED in
+     *-[ABCD])
+              $LOGGING && log_msg 007-share-links "Gruppe: $GRMITGLIED ist eine Subklasse..."
+              SERVER="/home/share/subclasses/$GRMITGLIED"
+              ;;
+     teachers)
+              $LOGGING && log_msg 007-share-links "Gruppe: $GRMITGLIED ist die Lehrergruppe..."
+              SERVER="/home/share/$SHARETEACHERS"
+              LOKAL="$HOMEDIR/$LINKFOLDERSHARE/tausch-$TEACHERS"
+              ;;
+     p_*)
+              $LOGGING && log_msg 007-share-links "Gruppe: $GRMITGLIED ist eine Projektgruppe..."
+              SERVER="/home/share/$SHAREPROJECTS/$GRMITGLIED"
+              ;;
+     *)
+              $LOGGING && log_msg 007-share-links "Gruppe: $GRMITGLIED ist eine Klasse..."
+              SERVER="/home/share/$SHARECLASSES/$GRMITGLIED"
+              ;;
+   esac
+   $LOGGING && log_msg 007-share-links "verlinke $LOKAL $SERVER"
+   verlinke "$LOKAL" "$SERVER"
+done
+
+# schulweites Tauschverzeichnis
+LOKAL="$HOMEDIR/$LINKFOLDERSHARE/tausch-$SCHOOL"
+SERVER="/home/share/$SHARESCHOOL"
+$LOGGING && log_msg 007-share-links "verlinke $LOKAL $SERVER"
+verlinke "$LOKAL" "$SERVER"
+
+# Das Script wird nicht mit einem "exit 0" beendet, da es in das Script
+# /usr/sbin/linuxmuster-pam-mount includiert ist und dadurch ein exit
+# das Hauptscript beenden würde.

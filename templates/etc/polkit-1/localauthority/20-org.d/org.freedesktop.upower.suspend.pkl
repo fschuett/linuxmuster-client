@@ -1,0 +1,6 @@
+[org.freedesktop.upower.suspend]
+Identity=unix-user:*
+Action=org.freedesktop.upower.suspend
+ResultAny=no
+ResultInactive=no
+ResultActive=no

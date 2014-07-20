@@ -1,0 +1,42 @@
+# linuxmuster client package specific variables
+# don't change this, it will be overwritten by package upgrade
+# <schmitt@lmz-bw.de>
+# 12.12.2009
+#
+# changed to openSUSE defaults Frank Schütte
+# 2011
+
+# client package related
+SYSCONFDIR="/etc"
+USERCONFIG="$SYSCONFDIR/sysconfig/linuxmuster-client"
+PREMOUNTHOOKSDIR="$SYSCONFDIR/linuxmuster-client/pre-mount.d"
+POSTMOUNTHOOKSDIR="$SYSCONFDIR/linuxmuster-client/post-mount.d"
+PREUMOUNTHOOKSDIR="$SYSCONFDIR/linuxmuster-client/pre-umount.d"
+POSTUMOUNTHOOKSDIR="$SYSCONFDIR/linuxmuster-client/post-umount.d"
+HELPERFUNCTIONS="/usr/share/linuxmuster-client/helperfunctions.inc"
+
+# should be the same as on the server
+# in /usr/share/linuxmuster/config/dist.conf
+ADMINISTRATOR="administrator"
+PGMADMIN="pgmadmin"
+DOMADMINS="domadmins"
+PRINTERADMINS="printoperators"
+TEACHERSGROUP="teachers"
+ADMINGROUP="administrators"
+ADMINSHOME="/home/$ADMINGROUP"
+TEACHERSHOME="/home/teachers"
+STUDENTSHOME="/home/students"
+WSHOME="/home/workstations"
+SHAREHOME="/home/share"
+ATTICHOME="/home/attic"
+SOPHOMORIXCACHE="/var/cache/sophomorix"
+TASKSCACHE="$SOPHOMORIXCACHE/tasks"
+SAMBAHOME="/home/samba"
+NETLOGONDIR="$SAMBAHOME/netlogon"
+PROGSDIR="$SAMBAHOME/progs"
+CDSDIR="$SAMBAHOME/cds"
+# some german translations
+SHARECLASSES="Klassen"
+SHARETEACHERS="Kollegium"
+SHAREPROJECTS="Projekte"
+SHARESCHOOL="Schule"

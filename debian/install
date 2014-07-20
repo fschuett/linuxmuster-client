@@ -1,0 +1,8 @@
+etc/*	etc/linuxmuster-client/
+templates/*	var/lib/linuxmuster-client/templates/
+debian/sysconfig.linuxmuster-client	var/adm/fillup-templates/
+share/*	usr/share/linuxmuster-client/
+debian/boot.linuxmuster-client-early	etc/init.d/
+debian/linuxmuster-client	etc/init.d/
+sbin/*	/usr/sbin/
+sysconfig/*	etc/sysconfig/

@@ -1,0 +1,54 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          boot.linuxmuster-client-early
+# Required-Start:    boot.rootfsck
+# Required-Stop:     $null
+# Default-Start:     B
+# Default-Stop:
+# Short-Description: updates config files
+# Description:       linuxmuster debian client configuration script
+### END INIT INFO
+
+# Thomas Schmitt <schmitt@lmz-bw.de>
+# 11.07.2009
+# fschuett 2011
+
+# read hostname
+clientname=`/bin/hostname`
+[ -z "$clientname" ] && exit 0
+
+DHCLIENTCONF=/etc/dhclient.conf
+UPDATESCRIPT=/usr/share/linuxmuster-client/update-client-config
+
+inhibit_screenlock(){
+    SLFILE=/usr/lib/kde4/libexec/kscreenlocker
+    if [ -e "${SLFILE}" ]; then
+	if [ ! -e "${SLFILE}.disabled" ]; then
+	    cp -f "${SLFILE}" "${SLFILE}.disabled"
+	fi
+	echo "#!/bin/bash" >"${SLFILE}"
+	echo "exit 0" >>"${SLFILE}"
+    fi
+}
+
+
+case $1 in
+
+	start)
+		if [ -e "$UPDATESCRIPT" ]; then
+			$UPDATESCRIPT
+		fi
+		inhibit_screenlock
+		;;
+
+	status)
+		;;
+	reload)
+		;;
+	*)
+		;;
+
+esac
+
+exit 0

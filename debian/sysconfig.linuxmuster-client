@@ -1,0 +1,108 @@
+## Path: linuxmuster-client
+## Type: string
+## Default: 10.16.1.1
+## Description: LDAP Server host.
+## The address of the LDAP server used.
+## Note: It is always a good idea to use an IP address, it reduces risks of failure.
+## If you want to use CHECK_CERT=yes you have to use a host name or include the
+## servers IP in the server certificate. Otherwise the check will fail.
+LDAP_SERVER="10.16.1.1"
+
+## Path: linuxmuster-client
+## Type: string
+## Default: dc=linuxmuster,dc=lokal
+## Description: The distinguished name of the search base.
+BASE_DN="dc=linuxmuster,dc=lokal"
+
+## Path: linuxmuster-client
+## Type: yesno
+## Default: no
+## Description: Check ldap connection for a valid certificate?
+## This does not work with self signed certificates.
+CHECK_CERT=no
+
+## Path: linuxmuster-client
+## Type: string
+## Default: linuxadmin
+## Description: Login name of template user.
+## Template user from who certain profile directories were copied to the user's home.
+TEMPLATE_USER=
+
+## Path: linuxmuster-client
+## Type: boolean
+## Default: false
+## Description: Copy initial Firefox profile to user's home?
+FIREFOX=false
+
+## Path: linuxmuster-client
+## Type: string
+## Default: firefox
+## Description: Firefox profile directory, below $APPS_BASEDIR
+FIREFOX_PROFILE=firefox
+
+## Path: linuxmuster-client
+## Type: string
+## Default: Eigene Dateien
+## Description: Name of the folder which contains the user files.
+## Folder will be created in user's home if it does not exist and linked to the desktop.
+MYFILES="Eigene Dateien"
+
+## Path: linuxmuster-client
+## Type: string
+## Default: Einstellungen
+## Description: Name of the folder in user's home which will contain the application settings (Firefox etc.).
+## Folder will be created in user's home if it does not exist.
+APPS_BASEDIR="Einstellungen"
+
+## Path: linuxmuster-client
+## Type: string
+## Default: 
+## Description: Directories, that will be linked in /tmp on login. That can be Desktop .kde4 .local
+LINKDIRS=""
+
+## Path: linuxmuster-client
+## Type: string
+## Default: Desktop .config .local .gconf .gconfd .gnome2 .gnome2_private .kde4
+## Description: Directories, that will be created in the template users profile dir
+PROFILE_DIRS="Desktop .config .local .gconf .gconfd .gnome2 .gnome2_private .kde4"
+
+## Path: linuxmuster-client/shares
+## Type: string
+## Default: 
+## Description: Directory, that will contain the shared folder links. Ignored, if empty.
+LINKFOLDERSHARE="__tauschen"
+
+## Path: linuxmuster-client/shares
+## Type: string
+## Default: 
+## Description: Directory, that will contain the template folders. Ignored, if empty.
+LINKFOLDERTASKS="__vorlagen"
+
+## Path: linuxmuster-client/shares
+## Type: string
+## Default: 
+## Description: Um den Raumnamen aus dem Rechnernamen zu extrahieren, gibt man die 
+## Zeichenfolge an, die als TRENNER Raumname von Rechnernummer 
+## trennt (TRENNER=p -> j1009p15 -> j1009)
+TRENNER="-"
+
+## Path: linuxmuster-client/shares
+## Type: string
+## Default: 
+## Description: Die Gruppe "teachers" kann mit einem Namen versehen werden, z.B. 
+## TEACHERS="Kollegium" (für Tauschverzeichnisse)
+TEACHERS="Kollegium"
+
+## Path: linuxmuster-client/shares
+## Type: string
+## Default: 
+## Description: Die Bezeichnung "school" kann mit einem Namen versehen werden, z.B. 
+## SCHOOL="Schule" (für Tauschverzeichnisse)
+SCHOOL="Schule"
+
+## Path: linuxmuster-client/auth
+## Type:        yesno
+## Default:     yes
+## Autoconfigure initial hostname (set /etc/HOSTNAME) for next boot speed up? ("yes" or "no")
+AUTOCONFIGURE_HOSTNAME="yes"
+

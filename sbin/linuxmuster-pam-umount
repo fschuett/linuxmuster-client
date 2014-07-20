@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# umount wrapper for pam_mount
+# Thomas Schmitt <schmitt@lmz-bw.de>
+# Frank Schiebel <frank@linuxmuster.net>
+#
+# 27.04.2012
+# GPL v2
+
+# default value for PROFILE_USER
+PROFILE_USER="linuxadmin"
+
+. /usr/share/linuxmuster-client/config || exit 1
+. $USERCONFIG || exit 1
+. /usr/share/linuxmuster-client/helperfunctions.inc || exit 1
+. /usr/share/linuxmuster-client/profile || exit 1
+
+# parameters given by pam_mount
+SERVER=$1
+VOLUME=$2
+MNTPT=$3
+USER=$4
+
+
+
+# Log invocation and parameters
+log_msg "Umount invoked with: SERVER $SERVER, VOLUME $VOLUME, MNTPT $MNTPT, USER $USER"
+
+# umounting part starts here
+
+# check if params are all set
+[ -z "$SERVER" ] && exit 1
+[ -z "$VOLUME" ] && exit 1
+[ -z "$MNTPT" ] && exit 1
+[ -z "$USER" ] && exit 1
+
+# no action for lightdm session
+if [ "$USER" == "lightdm" ]; then exit 0; fi
+# no action, no hooks for PROFILE_USER
+if [ "$USER" == "$PROFILE_USER" ]; then exit 0; fi
+# no action for local users
+grep -q ^${USER}: /etc/passwd && exit 0
+# umount only if USER is logged in
+if [ "`mount | grep $USER`" == "" ]; then exit 0; fi
+
+# PRE UMOUNT HOOK
+log_msg "pre-umount sequence: run_hookdir /etc/linuxmuster-client/pre-umount.d $USER $VOLUME $MNTPT $SERVER"
+run_hookdir /etc/linuxmuster-client/pre-umount.d $USER $VOLUME $MNTPT $SERVER
+
+# umount the given share
+log_msg "Unmounting $MNTPT"
+
+# umount given share
+umount $MNTPT || umount -l $MNTPT
+
+if cat /proc/mounts | grep -qw $MNTPT; then
+    log_msg "$MNTPT still mounted, trying again"
+    umount $MNTPT || umount -l $MNTPT
+fi
+
+if cat /proc/mounts | grep -qw $MNTPT; then
+    sleep 5
+    log_msg "$MNTPT still mounted, killing processes..."
+    kill -9 `lsof -t $MNTPT`
+    umount $MNTPT || umount -l $MNTPT
+fi
+
+# POST MOUNT HOOK
+log_msg "post-umount sequence: run_hookdir /etc/linuxmuster-client/post-umount.d $USER $VOLUME $MNTPT $OPTIONS $SERVER"
+run_hookdir /etc/linuxmuster-client/post-umount.d $USER $VOLUME $MNTPT $SERVER

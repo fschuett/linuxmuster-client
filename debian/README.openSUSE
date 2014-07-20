@@ -1,0 +1,52 @@
+Integration von Linux-Clients in linuxmuster.net
+------------------------------------------------
+
+Zunächst wird das Paket linuxmuster-client fuer linuxmuster.net >= 6.1 installiert.
+Für linuxmuster.net < 6.1 gibt es das alte Paket linuxmuster-client60.
+
+openSuSE ab 10.3
+****************
+
+Installation
+============
+YaST2->Netzwerkdienste->LDAP-Client
+-----------------------------------
+Mit YaST2 muss der LDAP-Dienst aktiviert werden. Das ist eine Voraussetzung für die korrekte
+Funktion dieses Pakets.
+Bitte starten Sie den Client mittels YaST2 und nehmen Sie die folgenden Einstellungen vor:
+Use LDAP -> true
+LDAP-Server -> IP-Adresse des Musterlösungsservers, normalerweise 10.16.1.1
+LDAP-Base-DN -> Die LDAP-Basis-Domäne muss unbedingt an die tatsächlichen Gegebenheiten
+angepasst werden, ausgeliefert wird der Server mit "dc=linuxmuster,dc=lokal".
+
+YaST2->System->sysconfig-Editor
+-------------------------------
+linuxmuster-client/LDAP_SERVER wie oben
+linuxmuster-client/BASE_DN wie oben
+
+Danach muss der Computer neu gestartet werden, um die Einstellungen zu aktivieren.
+
+Zertifikate
+===========
+Normalerweise verwendet der linuxmuster.net-Server ein selbstsigniertes Zertifikat. Dieses wird nicht
+anerkannt, daher ist die entsprechende Überprüfung ausgeschaltet. Falls ein signiertes Zertifikat
+verwendet werden soll, muss dieses auf dem Client installiert werden.
+In diesem Fall muss in YaST2 im LDAP-Client unter Erweiterte Konfiguration entweder
+der Pfad des Zertifikats oder das Verzeichnis, in dem sich ein oder mehrere Zertifikate
+befinden, angegeben werden.
+
+Zur Aktivierung muss dann
+
+YaST2->System->sysconfig-Editor
+-------------------------------
+linuxmuster-client/CHECK_CERT="yes"
+
+eingestellt werden.
+
+
+Hinweis
+-------
+Falls Zertifikate verwendet werden sollen, muss bei der Einrichtung des LDAP-Servers unter
+YaST für die Variable LDAP-Server der RECHNERNAME angegeben werden, falls sonst keine Zertifikats-
+überprüfung möglich ist.
+Alternativ muss die IP-Adresse als 'altSubjectName' 'IP:...' mit in das Zertifikat aufgenommen werden.

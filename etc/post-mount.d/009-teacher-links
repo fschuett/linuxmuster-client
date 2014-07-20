@@ -1,0 +1,25 @@
+#!/bin/bash
+# Script created by Frank Schütte fschuett@gymnasium-himmelsthuer.de
+# License: Free Software (License GPLv3)
+# 20.7.2014
+
+. /usr/share/linuxmuster-client/config || exit 1
+. ${USERCONFIG} || exit 1
+. ${HELPERFUNCTIONS} || exit 1
+
+[ $VOLUME == students ] ||  return 0
+
+PGRUPPE=$(id -ng $USER)
+
+[ $PGRUPPE == teachers ] || return 0
+
+$LOGGING && log_msg post-mount "Entering 009-teacher-links $1 $2 HOMEDIR=$HOMEDIR,USER=$USER,VOLUME=$VOLUME,LINKFOLDERSHARE=$LINKFOLDERSHARE,SCHOOL=$SCHOOL,TEACHERS=$TEACHERS"
+
+SERVER="/home/students"
+LOKAL=$HOMEDIR/__schueler
+$LOGGING && log_msg post-mount "verlinke $LOKAL $SERVER"
+verlinke "$LOKAL" "$SERVER"
+
+# Das Script wird nicht mit einem "exit 0" beendet, da es in das Script
+# /usr/sbin/linuxmuster-pam-mount includiert ist und dadurch ein exit
+# das Hauptscript beenden würde.

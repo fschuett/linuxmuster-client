@@ -1,0 +1,54 @@
+#!/bin/bash
+# linuxmuster-client config hostname
+#
+# gets hostname configuration from dns
+
+[ "$2" != "lo" ] || exit 0
+
+[ -f /etc/sysconfig/linuxmuster-client ] && . /etc/sysconfig/linuxmuster-client
+
+if [ "${AUTOCONFIGURE_HOSTNAME}" != "yes" ]; then
+    echo "Info: Autoconfiguring of HOSTNAME disabled"
+    return 0
+fi
+
+# determine client ip
+clientip=`ifconfig  | grep 255.240.0.0 | awk '{print $2}' | awk -F: '{print $2}'`
+clientname=`host $clientip | awk '{print $5}' | cut -d. -f1`
+fqhn=`host $clientip | awk '{print $5}'`
+fqhn=${fqhn%.}
+# determine servername
+fqsn=`host -v $clientip | grep -A1 AUTHORITY | grep in.addr | awk '{print $5}'`
+# determine serverip
+serverip=`host $fqsn | awk '{print $4}'`
+PARTS=$(echo $fqsn | tr "." "\n")
+
+sn=""
+basedn=""
+for part in $PARTS; do
+    if [ -z ${sn}  ]; then
+     sn="$part"
+    else
+     if [ -z ${basedn} ]; then
+    basedn="dc=$part"
+     else
+    basedn="$basedn,dc=$part"
+     fi
+    fi
+done
+
+echo "Autoconfiguring HOSTNAME..."
+echo "  Client IP is: <$clientip>"
+echo "  Client hostname is: <$clientname>"
+echo "  Full hostname is: <$fqhn>"
+echo "  Server IP is: <$serverip>"
+echo "  Server name is: <$fqsn>"
+echo "  Server host name is: <$sn>"
+echo "  BaseDN is: <$basedn>"
+
+# configuring hostname
+if [ ! -z $fqhn ]; then
+    if [ "$clientname" != "$fqhn" ]; then
+	echo $fqhn > /etc/HOSTNAME
+    fi
+fi

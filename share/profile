@@ -1,0 +1,13 @@
+# supplemental profile for linuxmuster client
+# 11.07.2009
+
+# no redirection for local users
+if test -n "$USER" && ! grep -q ^${USER}: /etc/passwd; then
+
+	# read linuxmuster-client default variables
+	. /usr/share/linuxmuster-client/config
+
+	[ -e "$USERCONFIG" ] && . $USERCONFIG
+
+fi
+
